@@ -3,7 +3,10 @@ from types import NoneType
 import requests
 import json
 
-from .config import *
+BASE_URL = "https://encurta.net/api"
+
+INTERSTITIALS_ADS = 1
+NO_ADS = 0
 
 class EncurtaNetError(Exception):
     @validate_arguments
@@ -77,7 +80,7 @@ class EncurtaNet:
         if is_text_format:
             params["format"] = "text"
 
-        if ads_type:
+        if ads_type != None:
             if ads_type == INTERSTITIALS_ADS:
                 params["type"] = INTERSTITIALS_ADS
 
@@ -85,14 +88,13 @@ class EncurtaNet:
                 params["type"] = NO_ADS
 
             else:
-                raise EncurtaNetError()
+                raise EncurtaNetError(f"{ads_type} is not valid ads type")
 
         response = requests.get(BASE_URL, params)
         json_response = response.json()
 
         if response.status_code != 200:
-            raise EncurtaNetError()
-
+            raise EncurtaNetError(f"[Request Error] Status code: {response.status_code}")
 
         if response.text == "" or json_response["status"] == "error":
             message = json_response["message"]
