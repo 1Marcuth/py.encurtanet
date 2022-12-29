@@ -6,7 +6,7 @@ with open("README.md", "r") as readme_bf:
 
 setup(
     name="encurtanet",
-    version="0.0.0.0.2",
+    version="0.0.0.0.3",
     license="MIT License",
     author="Marcuth",
     long_description=readme_content,
