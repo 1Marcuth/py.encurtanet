@@ -28,7 +28,7 @@ class EncurtaNetResponse:
 
         self.json_response: dict = json.loads(self.response)
 
-    def get(self) -> str | dict:
+    def get_raw_data(self) -> str | dict:
         if self.is_text_format:
             return self.response
 

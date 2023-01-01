@@ -6,7 +6,7 @@ with open("README.md", "r") as readme_bf:
 
 setup(
     name="encurtanet",
-    version="0.0.0.0.3",
+    version="0.0.0.0.4",
     license="MIT License",
     author="Marcuth",
     long_description=readme_content,
@@ -14,8 +14,6 @@ setup(
     author_email="marcuth2006@gmail.com",
     keywords="encurtanet wrapper api",
     description=f"Wrappper for {BASE_URL}",
-    packages=[
-        "encurtanet",
-    ],
+    packages=["encurtanet"],
     install_requires=["requests", "pydantic"],
 )
