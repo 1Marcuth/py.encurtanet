@@ -1,15 +1,12 @@
-from pydantic import validate_arguments
-from types import NoneType
+from pydantic import validate_call
+from typing import Optional
 import requests
 import json
 
-BASE_URL = "https://encurta.net/api"
-
-INTERSTITIALS_ADS = 1
-NO_ADS = 0
+from .ads_types import AdsTypes
 
 class EncurtaNetError(Exception):
-    @validate_arguments
+    @validate_call
     def __init__(self, message: str) -> None:
         self.message = message
 
@@ -17,7 +14,7 @@ class EncurtaNetError(Exception):
         return f"EncurtaNetError({self.message})"
 
 class EncurtaNetResponse:
-    @validate_arguments
+    @validate_call
     def __init__(
         self,
         response: str,
@@ -28,25 +25,29 @@ class EncurtaNetResponse:
 
         self.json_response: dict = json.loads(self.response)
 
-    def get_raw_data(self) -> str | dict:
+    @property
+    def raw_data(self) -> str | dict:
         if self.is_text_format:
             return self.response
 
         return self.json_response
 
-    def get_shortened_url(self) -> str | None:
+    @property
+    def shortened_url(self) -> str:
         if self.is_text_format:
             raise EncurtaNetError("It is not possible to get this data because you passed 'is_text_format' as True")
 
         return self.json_response["shortenedUrl"]
 
-    def get_status(self) -> str | None:
+    @property
+    def status(self) -> str:
         if self.is_text_format:
             raise EncurtaNetError("It is not possible to get this data because you passed 'is_text_format' as True")
 
         return self.json_response["status"]
 
-    def get_message(self) -> str | None:
+    @property
+    def message(self) -> str:
         if self.is_text_format:
             raise EncurtaNetError("It is not possible to get this data because you passed 'is_text_format' as True")
 
@@ -54,23 +55,24 @@ class EncurtaNetResponse:
             return self.json_response["message"]
 
 class EncurtaNet:
-    @validate_arguments
+    @validate_call
     def __init__(
         self,
         api_token: str,
     ) -> None:
-        self.__api_token = api_token
+        self._base_url = "https://encurta.net/api"
+        self._api_token = api_token
 
-    @validate_arguments
+    @validate_call
     def shorten(
         self,
         url: str,
-        alias: str | NoneType = None,
+        alias: Optional[str] = None,
         is_text_format: bool = False,
-        ads_type: int | NoneType = None,
+        ads_type: Optional[int] = None,
     ) -> EncurtaNetResponse:
         params = {
-            "api": self.__api_token,
+            "api": self._api_token,
             "url": url,
         }
 
@@ -81,16 +83,16 @@ class EncurtaNet:
             params["format"] = "text"
 
         if ads_type != None:
-            if ads_type == INTERSTITIALS_ADS:
-                params["type"] = INTERSTITIALS_ADS
+            if ads_type == AdsTypes.InterstitialAds:
+                params["type"] = AdsTypes.InterstitialAds
 
-            elif ads_type == NO_ADS:
-                params["type"] = NO_ADS
+            elif ads_type == AdsTypes.NoAds:
+                params["type"] = AdsTypes.NoAds
 
             else:
                 raise EncurtaNetError(f"{ads_type} is not valid ads type")
 
-        response = requests.get(BASE_URL, params)
+        response = requests.get(self._base_url, params)
         json_response = response.json()
 
         if response.status_code != 200:
